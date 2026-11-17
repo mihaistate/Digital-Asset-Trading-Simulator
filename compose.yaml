@@ -1,0 +1,22 @@
+services:
+  engine:
+    build: .
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      FEED_MODE: ${FEED_MODE:-demo}
+      API_TOKEN: ${API_TOKEN:-}
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/healthz"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+  strategy:
+    build: ./python
+    profiles: ["algo"]
+    environment:
+      ENGINE_URL: http://engine:8080
+      API_TOKEN: ${API_TOKEN:-}
+    depends_on:
+      engine:
+        condition: service_healthy
